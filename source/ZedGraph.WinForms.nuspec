@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>ZedGraph.WinForms</id>
-    <version>5.1.7</version>
+    <version>5.1.8</version>
     <title />
     <authors>ZedGraph Project</authors>
     <owners />
@@ -18,7 +18,7 @@
       <frameworkAssembly assemblyName="System.Windows.Forms" />
     </frameworkAssemblies>
     <dependencies>
-      <dependency id="ZedGraph" version="$version$" />
+      <dependency id="ZedGraph" version="5.1.8" />
     </dependencies>
   </metadata>
   <files>

@@ -34,5 +34,5 @@
   <PropertyGroup>
     <UpdateAssemblyInfo>false</UpdateAssemblyInfo>
   </PropertyGroup>
-  <Import Project="packages\GitVersionTask.3.6.5\build\dotnet\GitVersionTask.targets" />
+  <Import Project="packages\GitVersionTask.5.1.1\build\dotnet\GitVersionTask.targets" />
 </Project>
