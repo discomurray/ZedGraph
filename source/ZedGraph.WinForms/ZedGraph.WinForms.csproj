@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net35;net40;net45;net46;net47</TargetFrameworks>
+    <TargetFrameworks>net35;net40;net45;net46;net47;net48;net5.0-windows</TargetFrameworks>
     <RootNamespace>ZedGraph</RootNamespace>
     <AssemblyName>ZedGraph.WinForms</AssemblyName>
 

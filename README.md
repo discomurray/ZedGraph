@@ -1,5 +1,7 @@
 # ZedGraph
 
+(Now with .NET 5 target framework)
+
 *The charting library for .NET*
 
 created by John Champion
