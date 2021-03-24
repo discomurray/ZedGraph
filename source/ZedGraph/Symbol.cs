@@ -555,8 +555,14 @@ namespace ZedGraph
 		/// <param name="isSelected">Indicates that the <see cref="Symbol" /> should be drawn
 		/// with attributes from the <see cref="Selection" /> class.
 		/// </param>
+		/// <param name="minAcceptableY">The minimum acceptable Y value. This is calculated and
+		/// passed down by the parent <see cref="LineItem"/> object using the
+		/// <see cref="CurveItem.MinAcceptableY"/> property.</param>
+		/// <param name="maxAcceptableY">the maximum acceptable Y value. This is calculated and
+		/// passed down by the parent <see cref="LineItem"/> object using the
+		/// <see cref="CurveItem.MaxAcceptableY"/> property.</param>
 		public void Draw( Graphics g, GraphPane pane, LineItem curve, float scaleFactor,
-			bool isSelected )
+			bool isSelected, double minAcceptableY, double maxAcceptableY)
 		{
 			Symbol source = this;
 			if ( isSelected )
@@ -637,7 +643,9 @@ namespace ZedGraph
 									!System.Double.IsInfinity( curY ) &&
 									( curX > 0 || !xIsLog ) &&
 									( !yIsLog || curY > 0.0 ) &&
-									( xIsOrdinal || ( curX >= xMin && curX <= xMax ) ) )
+									( xIsOrdinal || ( curX >= xMin && curX <= xMax )) &&
+									(curY >= minAcceptableY) && 
+									(curY <= maxAcceptableY))
 							{
 								// Transform the user scale values to pixel locations
 								tmpX = (int) xScale.Transform( curve.IsOverrideOrdinal, i, curX );

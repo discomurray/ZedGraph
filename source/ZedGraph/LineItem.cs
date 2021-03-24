@@ -290,9 +290,9 @@ namespace ZedGraph
 		{
 			if ( _isVisible )
 			{
-				Line.Draw( g, pane, this, scaleFactor );
+				Line.Draw( g, pane, this, scaleFactor, MinAcceptableY, MaxAcceptableY);
 				
-				Symbol.Draw( g, pane, this, scaleFactor, IsSelected );
+				Symbol.Draw( g, pane, this, scaleFactor, IsSelected, MinAcceptableY, MaxAcceptableY);
 			}
 		}		
 

@@ -204,6 +204,9 @@ namespace ZedGraph
 			this.Tag = null;
 			_yAxisIndex = 0;
 			_link = new Link();
+
+			MinAcceptableY = double.MinValue;
+			MaxAcceptableY = double.MaxValue;
 		}
 			
 		/// <summary>
@@ -619,9 +622,27 @@ namespace ZedGraph
 			set { _link = value; }
 		}
 
-	#endregion
-	
-	#region Rendering Methods
+		/// <summary>
+		/// Gets or sets the maximum acceptable Y value. Any points with a Y value greater than 
+		/// this will be ignored when plotting the curve.
+		/// </summary>
+		/// <remarks>
+		/// The default value is <code>double.MaxValue</code>
+		/// </remarks>
+		public double MaxAcceptableY { get; set; }
+
+		/// <summary>
+		/// Gets or sets the minimum acceptable Y value. Any points with a Y value less than 
+		/// this will be ignored when plotting the curve.
+		/// </summary>
+		/// <remarks>
+		/// The default value is <code>double.MinValue</code>
+		/// </remarks>
+		public double MinAcceptableY { get; set; }
+
+		#endregion
+
+		#region Rendering Methods
 		/// <summary>
 		/// Do all rendering associated with this <see cref="CurveItem"/> to the specified
 		/// <see cref="Graphics"/> device.  This method is normally only

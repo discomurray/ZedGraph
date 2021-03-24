@@ -341,9 +341,9 @@ namespace ZedGraph
 			info.AddValue( "isOptimizedDraw", _isOptimizedDraw );
 		}
 
-	#endregion
+		#endregion
 
-	#region Rendering Methods
+		#region Rendering Methods
 
 		/// <summary>
 		/// Do all rendering associated with this <see cref="Line"/> to the specified
@@ -366,7 +366,14 @@ namespace ZedGraph
 		/// </param>
 		/// <param name="curve">A <see cref="LineItem"/> representing this
 		/// curve.</param>
-		public void Draw( Graphics g, GraphPane pane, CurveItem curve, float scaleFactor )
+		/// <param name="minAcceptableY">The minimum acceptable Y value. This is calculated and
+		/// passed down by the parent <see cref="LineItem"/> object using the
+		/// <see cref="CurveItem.MinAcceptableY"/> property.</param>
+		/// <param name="maxAcceptableY">the maximum acceptable Y value. This is calculated and
+		/// passed down by the parent <see cref="LineItem"/> object using the
+		/// <see cref="CurveItem.MaxAcceptableY"/> property.</param>
+		public void Draw( Graphics g, GraphPane pane, CurveItem curve, float scaleFactor,
+								double minAcceptableY, double maxAcceptableY)
 		{
 			// If the line is being shown, draw it
 			if ( this.IsVisible )
@@ -380,11 +387,11 @@ namespace ZedGraph
 					g.SmoothingMode = SmoothingMode.HighQuality;
 
 				if ( curve is StickItem )
-					DrawSticks( g, pane, curve, scaleFactor );
+					DrawSticks( g, pane, curve, scaleFactor, minAcceptableY, maxAcceptableY);
 				else if ( this.IsSmooth || this.Fill.IsVisible )
-					DrawSmoothFilledCurve( g, pane, curve, scaleFactor );
+					DrawSmoothFilledCurve( g, pane, curve, scaleFactor, minAcceptableY, maxAcceptableY);
 				else
-					DrawCurve( g, pane, curve, scaleFactor );
+					DrawCurve( g, pane, curve, scaleFactor, minAcceptableY, maxAcceptableY);
 
 				g.SmoothingMode = sModeSave;
 			}
@@ -448,7 +455,14 @@ namespace ZedGraph
 		/// <see cref="PaneBase.CalcScaleFactor"/> method, and is used to proportionally adjust
 		/// font sizes, etc. according to the actual size of the graph.
 		/// </param>
-		public void DrawSticks( Graphics g, GraphPane pane, CurveItem curve, float scaleFactor )
+		/// <param name="minAcceptableY">The minimum acceptable Y value. This is calculated and
+		/// passed down by the parent <see cref="LineItem"/> object using the
+		/// <see cref="CurveItem.MinAcceptableY"/> property.</param>
+		/// <param name="maxAcceptableY">the maximum acceptable Y value. This is calculated and
+		/// passed down by the parent <see cref="LineItem"/> object using the
+		/// <see cref="CurveItem.MaxAcceptableY"/> property.</param>
+		public void DrawSticks( Graphics g, GraphPane pane, CurveItem curve, float scaleFactor,
+								double minAcceptableY, double maxAcceptableY)
 		{
 			Line source = this;
 			if ( curve.IsSelected )
@@ -471,7 +485,9 @@ namespace ZedGraph
 							!System.Double.IsInfinity( pt.X ) &&
 							!System.Double.IsInfinity( pt.Y ) &&
 							( !xAxis._scale.IsLog || pt.X > 0.0 ) &&
-							( !yAxis._scale.IsLog || pt.Y > 0.0 ) )
+							( !yAxis._scale.IsLog || pt.Y > 0.0) &&
+							(pt.Y >= minAcceptableY) && 
+							(pt.Y <= maxAcceptableY))
 					{
 						float pixY = yAxis.Scale.Transform( curve.IsOverrideOrdinal, i, pt.Y );
 						float pixX = xAxis.Scale.Transform( curve.IsOverrideOrdinal, i, pt.X );
@@ -522,8 +538,15 @@ namespace ZedGraph
 		/// </param>
 		/// <param name="curve">A <see cref="LineItem"/> representing this
 		/// curve.</param>
+		/// <param name="minAcceptableY">The minimum acceptable Y value. This is calculated and
+		/// passed down by the parent <see cref="LineItem"/> object using the
+		/// <see cref="CurveItem.MinAcceptableY"/> property.</param>
+		/// <param name="maxAcceptableY">the maximum acceptable Y value. This is calculated and
+		/// passed down by the parent <see cref="LineItem"/> object using the
+		/// <see cref="CurveItem.MaxAcceptableY"/> property.</param>
 		public void DrawSmoothFilledCurve( Graphics g, GraphPane pane,
-                                CurveItem curve, float scaleFactor )
+                                CurveItem curve, float scaleFactor,
+								double minAcceptableY, double maxAcceptableY)
 		{
 			Line source = this;
 			if ( curve.IsSelected )
@@ -591,7 +614,7 @@ namespace ZedGraph
 					}
 				}
 				else
-					DrawCurve( g, pane, curve, scaleFactor );
+					DrawCurve( g, pane, curve, scaleFactor, minAcceptableY, maxAcceptableY);
 			}
 		}
 
@@ -638,8 +661,15 @@ namespace ZedGraph
 		/// </param>
 		/// <param name="curve">A <see cref="LineItem"/> representing this
 		/// curve.</param>
+		/// <param name="minAcceptableY">The minimum acceptable Y value. This is calculated and
+		/// passed down by the parent <see cref="LineItem"/> object using the
+		/// <see cref="CurveItem.MinAcceptableY"/> property.</param>
+		/// <param name="maxAcceptableY">the maximum acceptable Y value. This is calculated and
+		/// passed down by the parent <see cref="LineItem"/> object using the
+		/// <see cref="CurveItem.MaxAcceptableY"/> property.</param>
 		public void DrawCurve( Graphics g, GraphPane pane,
-                                CurveItem curve, float scaleFactor )
+                                CurveItem curve, float scaleFactor,
+								double minAcceptableY, double maxAcceptableY)
 		{
 			Line source = this;
 			if ( curve.IsSelected )
@@ -712,7 +742,9 @@ namespace ZedGraph
 								System.Double.IsInfinity( curX ) ||
 								System.Double.IsInfinity( curY ) ||
 								( xIsLog && curX <= 0.0 ) ||
-								( yIsLog && curY <= 0.0 ) )
+								( yIsLog && curY <= 0.0) ||
+								(curY < minAcceptableY) ||
+								(curY > maxAcceptableY))
 						{
 							// If the point is invalid, then make a linebreak only if IsIgnoreMissing is false
 							// LastX and LastY are always the last valid point, so this works out
