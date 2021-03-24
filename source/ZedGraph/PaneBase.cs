@@ -134,9 +134,33 @@ namespace ZedGraph
 		[CLSCompliant(false)]
 		protected float _titleGap;
 
-	#endregion
+		/// <summary>Private field that determines whether or not the fonts, tics, gaps, etc.
+		/// will be scaled over their defined size according to the actual graph size.  
+		/// true for font and feature scaling above the default size (scaleFactor > 1.0)
+		/// with graph size, false for fixed font sizes when graph size increases above the 
+		/// default (scaleFactor = 1.0 constant).
+		/// Use the public property <see cref="FontsCanGrow"/> to access this value. </summary>
+		/// <seealso cref="FontsCanShrink"/>
+		/// <seealso cref="CalcScaleFactor"/>
+		/// <seealso cref="IsPenWidthScaled"/>
+		[CLSCompliant(false)]
+		protected bool _canFontsGrow;
 
-	#region Defaults
+		/// <summary>Private field that determines whether or not the fonts, tics, gaps, etc.
+		/// will be scaled below their defined size according to the actual graph size.  
+		/// true for font and feature scaling below the default size (scaleFactor > 1.0)
+		/// with graph size, false for fixed font sizes when graph size decreases below the 
+		/// default (scaleFactor = 1.0 constant).
+		/// Use the public property <see cref="FontsCanShrink"/> to access this value. </summary>
+		/// <seealso cref="FontsCanGrow"/>
+		/// <seealso cref="CalcScaleFactor"/>
+		/// <seealso cref="IsPenWidthScaled"/>
+		[CLSCompliant(false)]
+		protected bool _canFontsShrink;
+
+		#endregion
+
+		#region Defaults
 		/// <summary>
 		/// A simple struct that defines the default property values for the <see cref="PaneBase"/> class.
 		/// </summary>
@@ -387,7 +411,16 @@ namespace ZedGraph
 		public bool IsFontsScaled
 		{
 			get { return _isFontsScaled; }
-			set { _isFontsScaled = value; }
+            set
+            {
+                _isFontsScaled = value;
+                if (!_canFontsGrow && !_canFontsShrink && _isFontsScaled)
+                {
+                    // Make the fonts scalable
+                    _canFontsGrow = _isFontsScaled;
+                    _canFontsShrink = _isFontsScaled;
+                }
+            }
 		}
 		/// <summary>
 		/// Gets or sets the property that controls whether or not pen widths are scaled for this
@@ -413,15 +446,55 @@ namespace ZedGraph
 			get { return _isPenWidthScaled; }
 			set { _isPenWidthScaled = value; }
 		}
+        /// <summary>
+        /// Determines if the font sizes, tic sizes, gap sizes, etc. will be scaled above their 
+        /// default according to the size of the <see cref="Rect"/> and the <see cref="BaseDimension"/>.  
+        /// If this value is set to false, then the font sizes and tic sizes will never increase above 
+        /// those specified.
+        /// </summary>
+        /// <value>True to have the fonts and tics grow, false to have them constant when graph size is 
+        /// above the default</value>
+        /// <seealso cref="PaneBase.FontsCanGrow"/>
+        /// <seealso cref="PaneBase.CalcScaleFactor"/>
+        /// <seealso cref="PaneBase.IsFontsScaled"/>
+        public bool FontsCanGrow
+        {
+            get { return _canFontsGrow; }
+            set
+            {
+                _canFontsGrow = value;
+                _isFontsScaled = (_canFontsGrow || _canFontsShrink);
+            }
+        }
+        /// <summary>
+        /// Determines if the font sizes, tic sizes, gap sizes, etc. will be scaled below their 
+        /// default according to the size of the <see cref="Rect"/> and the <see cref="BaseDimension"/>.  
+        /// If this value is set to false, then the font sizes and tic sizes will never decrease below 
+        /// those specified.
+        /// </summary>
+        /// <value>True to have the fonts and tics shrink, false to have them constant when graph size is 
+        /// below the default</value>
+        /// <seealso cref="PaneBase.FontsCanShrink"/>
+        /// <seealso cref="PaneBase.CalcScaleFactor"/>
+        /// <seealso cref="PaneBase.IsFontsScaled"/>
+        public bool FontsCanShrink
+		{
+			get { return _canFontsShrink; }
+			set
+			{
+				_canFontsShrink = value;
+				_isFontsScaled = (_canFontsGrow || _canFontsShrink);
+			}
+		}
 
-	#endregion
-	
-	#region Constructors
+#endregion
 
-		/// <summary>
-		/// Default constructor for the <see cref="PaneBase"/> class.  Leaves the <see cref="Rect"/> empty.
-		/// </summary>
-		public PaneBase() : this( "", new RectangleF( 0, 0, 0, 0 ) )
+#region Constructors
+
+/// <summary>
+/// Default constructor for the <see cref="PaneBase"/> class.  Leaves the <see cref="Rect"/> empty.
+/// </summary>
+public PaneBase() : this( "", new RectangleF( 0, 0, 0, 0 ) )
 		{
 		}
 		
@@ -445,6 +518,9 @@ namespace ZedGraph
 			_border = new Border( Default.IsBorderVisible, Default.BorderColor,
 				Default.BorderPenWidth );
 
+			_canFontsGrow = Default.IsFontsScaled;
+			_canFontsShrink = Default.IsFontsScaled;
+
 			_title = new GapLabel( title, Default.FontFamily,
 				Default.FontSize, Default.FontColor, Default.FontBold,
 				Default.FontItalic, Default.FontUnderline );
@@ -465,6 +541,8 @@ namespace ZedGraph
 			// copy over all the value types
 			_isFontsScaled = rhs._isFontsScaled;
 			_isPenWidthScaled = rhs._isPenWidthScaled;
+			_canFontsGrow = rhs._canFontsGrow;
+			_canFontsShrink = rhs._canFontsShrink;
 
 			_titleGap = rhs._titleGap;
 			_baseDimension = rhs._baseDimension;
@@ -768,33 +846,36 @@ namespace ZedGraph
 		{
 			float scaleFactor; //, xInch, yInch;
 			const float ASPECTLIMIT = 1.5F;
-			
+
 			// if font scaling is turned off, then always return a 1.0 scale factor
-			if ( !_isFontsScaled )
+			if (!_isFontsScaled)
 				return 1.0f;
 
 			// Assume the standard width (BaseDimension) is 8.0 inches
 			// Therefore, if the rect is 8.0 inches wide, then the fonts will be scaled at 1.0
 			// if the rect is 4.0 inches wide, the fonts will be half-sized.
 			// if the rect is 16.0 inches wide, the fonts will be double-sized.
-		
+
 			// Scale the size depending on the client area width in linear fashion
-			if ( _rect.Height <= 0 )
+			if (_rect.Height <= 0)
 				return 1.0F;
 			float length = _rect.Width;
 			float aspect = _rect.Width / _rect.Height;
-			if ( aspect > ASPECTLIMIT )
+			if (aspect > ASPECTLIMIT)
 				length = _rect.Height * ASPECTLIMIT;
-			if ( aspect < 1.0F / ASPECTLIMIT )
+			if (aspect < 1.0F / ASPECTLIMIT)
 				length = _rect.Width * ASPECTLIMIT;
 
-			scaleFactor = length / ( _baseDimension * 72F );
+			scaleFactor = length / (_baseDimension * 72F);
 
 			// Don't let the scaleFactor get ridiculous
-			if ( scaleFactor < 0.1F )
+			if (scaleFactor < 0.1F)
 				scaleFactor = 0.1F;
-						
-			return scaleFactor;
+
+			if ((!_canFontsGrow && scaleFactor > 1.0) || (!_canFontsShrink && scaleFactor < 1.0))
+				return 1.0F;
+			else
+				return scaleFactor;
 		}
 
 		/// <summary>
