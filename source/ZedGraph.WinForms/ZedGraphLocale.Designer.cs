@@ -185,5 +185,22 @@ namespace ZedGraph {
                 return ResourceManager.GetString("y_title_def", resourceCulture);
             }
         }
+
+        internal static string show_histograms
+        {
+            get
+            {
+                return ResourceManager.GetString("show_histograms", resourceCulture);
+            }
+        }
+
+        internal static string isHiFreqVisible
+        {
+            get
+            {
+                return ResourceManager.GetString("isHiFreqVisible", resourceCulture);
+            }
+        }
+
     }
 }

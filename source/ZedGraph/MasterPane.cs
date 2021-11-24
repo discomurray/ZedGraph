@@ -1176,7 +1176,38 @@ namespace ZedGraph
 			}
 		}
 		*/
-	#endregion
+		#endregion
 
+		public Scale FindScale(PointF mousePt)
+		{
+			foreach (GraphPane pane in _paneList)
+			{
+				if (pane.XAxis.IsVisible)
+				{
+					if (pane.XAxis.Scale.Rect.Contains(mousePt))
+						return pane.XAxis.Scale;
+				}
+
+				if (pane.X2Axis.IsVisible)
+				{
+					if (pane.X2Axis.Scale.Rect.Contains(mousePt))
+						return pane.X2Axis.Scale;
+				}
+
+				foreach (Axis axis in pane.YAxisList)
+				{
+					if (axis.Scale.Rect.Contains(mousePt))
+						return axis.Scale;
+				}
+
+				foreach (Axis axis in pane.Y2AxisList)
+				{
+					if (axis.Scale.Rect.Contains(mousePt))
+						return axis.Scale;
+				}
+			}
+
+			return null;
+		}
 	}
 }

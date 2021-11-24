@@ -1230,7 +1230,7 @@ namespace ZedGraph
 			}
 		}
 
-	#endregion
+		#endregion
 
 	}
 }

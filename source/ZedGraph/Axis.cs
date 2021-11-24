@@ -130,9 +130,14 @@ namespace ZedGraph
 		/// </summary>
 		internal float _tmpSpace;
 
-	#endregion
+		/// <summary>
+		/// Mini Histogram chart part of the scale
+		/// </summary>
+		public ScaleHistogram _scaleHistogram;
 
-	#region Events
+		#endregion
+
+		#region Events
 
 		/// <summary>
 		/// A delegate that allows full custom formatting of the Axis labels
@@ -660,9 +665,15 @@ namespace ZedGraph
 			set { _scale = Scale.MakeNewScale( _scale, value ); }
 		}
 
-	#endregion
+		public ScaleHistogram ScaleHistogram
+		{
+			get { return _scaleHistogram; }
+		}
+
+		#endregion
 
 	#region Label Properties
+		#region Label Properties
 
 		/// <summary>
 		/// Gets or sets the <see cref="Label" /> class that contains the title of this

@@ -198,6 +198,39 @@ namespace ZedGraph
 						item.Enabled = false;
 					menuStrip.Items.Add( item );
 
+					Scale _selectedScale = this.MasterPane.FindScale(_menuClickPt);
+
+					item = new  ToolStripMenuItem();
+					item.Name="showHistogram";
+					item.Tag="showHistogram";
+					item.Checked = _selectedScale._ownerAxis._scaleHistogram.IsVisible;
+					menuStr= ZedGraphLocale.show_histograms;
+					item.Text=menuStr;
+					item.Click+=(x,y)=>{_selectedScale._ownerAxis._scaleHistogram.IsVisible=!_selectedScale._ownerAxis._scaleHistogram.IsVisible;};
+					item.Enabled=true;
+					menuStrip.Items.Add(item);
+					if(	_selectedScale._ownerAxis._scaleHistogram.IsVisible){
+						ScaleHistogram hist=_selectedScale._ownerAxis._scaleHistogram;
+						item=new ToolStripMenuItem();
+						item.Name="isHiFreqVisible";
+						item.Tag="isHiFreqVisible";
+						item.Checked=hist.IsHiFreqVisible;
+						menuStr= ZedGraphLocale.isHiFreqVisible;
+							item.Text=menuStr;
+						item.Click+=new EventHandler(showMode_Click);
+						item.Enabled=true;
+						menuStrip.Items.Add(item);
+	
+						item=new ToolStripMenuItem();
+						item.Name="histNBin";
+						item.Tag="histNBin";
+						menuStr="NBins";
+						item.Text=menuStr;
+						item.Click+=new EventHandler(histNBin_Click);
+						item.Enabled=true;
+						menuStrip.Items.Add(item);
+					}		
+					
 					item = new ToolStripMenuItem();
 					item.Name = "set_default";
 					item.Tag = "set_default";
@@ -613,6 +646,50 @@ namespace ZedGraph
 			}
 		}
 
+		void showMode_Click(object sender, EventArgs e)
+		{
+			ToolStripMenuItem item = sender as ToolStripMenuItem;
+			if (item != null && _selectedScale != null)
+			{
+				_selectedScale._ownerAxis._scaleHistogram.IsHiFreqVisible = !_selectedScale._ownerAxis._scaleHistogram.IsHiFreqVisible;
+			}
+		}
+
+		void histNBin_Click(object sender, EventArgs e)
+		{
+			ToolStripMenuItem item = sender as ToolStripMenuItem;
+			if (item != null && _selectedScale != null)
+			{
+				string strValue;
+				bool auto;
+				if (NBinPrompt.ShowDialog(_selectedScale._ownerAxis._scaleHistogram.NBin.ToString(),
+					_selectedScale._ownerAxis._scaleHistogram.IsAutoNBin, item.Text, out strValue, out auto))
+				{
+					int value;
+
+					if (Int32.TryParse(strValue, out value) && value != 1)
+					{
+						_selectedScale._ownerAxis._scaleHistogram.NBin = value;
+						_selectedScale._ownerAxis._scaleHistogram.IsAutoNBin = auto;
+
+						//Reset curve histograms
+						foreach (GraphPane pane in this.MasterPane.PaneList)
+						{
+							foreach (CurveItem curve in pane.CurveList)
+							{
+								curve._histogram = null;
+							}
+						}
+					}
+					else
+					{
+						System.Media.SystemSounds.Asterisk.Play();
+					}
+				}
+			}
+		}
+
+
 		/// <summary>
 		/// Handler for the "Show Values" context menu item.  Toggles the <see cref="IsShowPointValues"/>
 		/// property, which activates the point value tooltips.
@@ -888,7 +965,52 @@ namespace ZedGraph
 			}
 		}
 
-	#endregion
+		public static class NBinPrompt
+		{
+			public static bool ShowDialog(string value, bool isAuto, string caption, out string newValue, out bool newIsAuto)
+			{
+				Form prompt = new Form()
+				{
+					Width = 500,
+					Height = 150,
+					FormBorderStyle = FormBorderStyle.FixedDialog,
+					Text = caption,
+					StartPosition = FormStartPosition.CenterScreen
+				};
+
+				System.Windows.Forms.Label lbl = new System.Windows.Forms.Label();
+				lbl.Text = caption;
+				lbl.Location = new Point(50, 20);
+				CheckBox ckb = new CheckBox() { Left = 50, Top = 50, Width = 50 };
+				ckb.Text = "Auto";
+				ckb.Checked = isAuto;
+				TextBox textBox = new TextBox() { Left = 150, Top = 50, Width = 300 };
+				textBox.Text = value;
+				textBox.Tag = value;
+				textBox.Enabled = !ckb.Checked;
+				Button confirmation = new Button() { Text = "Ok", Left = 350, Width = 100, Top = 80, DialogResult = DialogResult.OK };
+				confirmation.Click += (sender, e) => { prompt.Close(); };
+				ckb.CheckedChanged += (object sender, EventArgs e) =>
+				{
+					textBox.Enabled = !ckb.Checked;
+					textBox.Text = ckb.Checked ? Convert.ToString(-1) : textBox.Tag.ToString();
+				};
+				prompt.Controls.Add(lbl);
+				prompt.Controls.Add(ckb);
+				prompt.Controls.Add(textBox);
+				prompt.Controls.Add(confirmation);
+				prompt.AcceptButton = confirmation;
+
+				DialogResult res = prompt.ShowDialog();
+
+				newValue = textBox.Text;
+				newIsAuto = ckb.Checked;
+
+				return res == DialogResult.OK;
+			}
+		}
+
+		#endregion
 
 	}
 }

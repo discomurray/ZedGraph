@@ -207,11 +207,13 @@ namespace ZedGraph
 		/// <summary>
 		/// private field that stores the owner Axis that contains this Scale instance.
 		/// </summary>
-		internal Axis _ownerAxis;
+		public Axis _ownerAxis;
 
-	#endregion
+		internal RectangleF _rect;
 
-	#region Defaults
+		#endregion
+
+		#region Defaults
 
 		/// <summary>
 		/// A simple struct that defines the
@@ -1614,32 +1616,36 @@ namespace ZedGraph
 			set { _textLabels = value; }
 		}
 
-	#endregion
-/*
-	#region events
+		#endregion
+		/*
+			#region events
 
-		/// <summary>
-		/// A delegate that allows full custom formatting of the Axis labels
-		/// </summary>
-		/// <param name="pane">The <see cref="GraphPane" /> for which the label is to be
-		/// formatted</param>
-		/// <param name="axis">The <see cref="Axis" /> for which the label is to be formatted</param>
-		/// <param name="val">The value to be formatted</param>
-		/// <param name="index">The zero-based index of the label to be formatted</param>
-		/// <returns>
-		/// A string value representing the label, or null if the ZedGraph should go ahead
-		/// and generate the label according to the current settings</returns>
-		/// <seealso cref="ScaleFormatEvent" />
-		public delegate string ScaleFormatHandler( GraphPane pane, Axis axis, double val, int index );
+				/// <summary>
+				/// A delegate that allows full custom formatting of the Axis labels
+				/// </summary>
+				/// <param name="pane">The <see cref="GraphPane" /> for which the label is to be
+				/// formatted</param>
+				/// <param name="axis">The <see cref="Axis" /> for which the label is to be formatted</param>
+				/// <param name="val">The value to be formatted</param>
+				/// <param name="index">The zero-based index of the label to be formatted</param>
+				/// <returns>
+				/// A string value representing the label, or null if the ZedGraph should go ahead
+				/// and generate the label according to the current settings</returns>
+				/// <seealso cref="ScaleFormatEvent" />
+				public delegate string ScaleFormatHandler( GraphPane pane, Axis axis, double val, int index );
 
-		/// <summary>
-		/// Subscribe to this event to handle custom formatting of the scale labels.
-		/// </summary>
-		public event ScaleFormatHandler ScaleFormatEvent;
+				/// <summary>
+				/// Subscribe to this event to handle custom formatting of the scale labels.
+				/// </summary>
+				public event ScaleFormatHandler ScaleFormatEvent;
 
-	#endregion
-*/
-	#region Methods
+			#endregion
+		*/
+		#region Methods
+		public RectangleF Rect
+		{
+			get { return _rect; }
+		}
 
 		/// <summary>
 		/// Setup some temporary transform values in preparation for rendering the

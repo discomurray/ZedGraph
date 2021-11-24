@@ -145,9 +145,14 @@ namespace ZedGraph
 		/// </summary>
 		internal Link _link;
 
-	#endregion
-	
-	#region Constructors
+		/// <summary>
+		/// Frequency values for <see cref="ScaleHistogram"/>
+		/// </summary>
+		public PointPairListHistogram _histogram;
+
+		#endregion
+
+		#region Constructors
 		/// <summary>
 		/// <see cref="CurveItem"/> constructor the pre-specifies the curve label, the
 		/// x and y data values as a <see cref="IPointList"/>, the curve

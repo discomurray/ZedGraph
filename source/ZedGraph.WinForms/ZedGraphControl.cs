@@ -81,6 +81,9 @@ namespace ZedGraph
 		/// </summary>
 		private MasterPane _masterPane;
 
+
+		private Scale _selectedScale = null;
+
 		/// <summary>
 		/// private field that determines whether or not tooltips will be displayed
 		/// when the mouse hovers over data values.  Use the public property
